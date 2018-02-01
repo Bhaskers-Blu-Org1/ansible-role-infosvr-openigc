@@ -23,6 +23,7 @@
   shell: "ls -1"
   args:
     chdir: "{{ ibm_infosvr_openigc_assets_dir }}/assets"
+  changed_when: False
   register: list_of_openigc_assets_to_load
 
 - name: upload any instances of OpenIGC assets

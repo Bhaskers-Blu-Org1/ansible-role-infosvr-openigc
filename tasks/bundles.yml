@@ -21,6 +21,7 @@
 
 - name: list bundles to be deployed
   find: file_type=directory paths={{ ibm_infosvr_openigc_assets_dir }}/bundles recurse=no
+  changed_when: False
   register: list_of_openigc_bundles
 
 - name: package each bundle into a zip archive
@@ -32,6 +33,7 @@
   shell: "ls -1 *.zip"
   args:
     chdir: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
+  changed_when: False
   register: list_of_openigc_bundles_to_deploy
 
 - name: check for existing OpenIGC bundles that are registered
@@ -42,6 +44,7 @@
     password: "{{ ibm_infosvr_openigc_admin_user_pwd }}"
     validate_certs: no
     status_code: 200
+  changed_when: False
   register: existing_openigc_bundles
 
 - name: create OpenIGC bundles that are not registered
