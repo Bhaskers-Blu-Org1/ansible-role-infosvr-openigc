@@ -1,0 +1,65 @@
+---
+###
+# Copyright 2018 IBM Corp. All Rights Reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+
+- name: transfer bundles
+  synchronize: src={{ item }} dest={{ ibm_infosvr_openigc_assets_dir }}/bundles mode=push
+  with_items: "{{ ibm_infosvr_openigc_bundle_directories }}"
+
+- name: list bundles to be deployed
+  find: file_type=directory paths={{ ibm_infosvr_openigc_assets_dir }}/bundles recurse=no
+  register: list_of_openigc_bundles
+
+- name: package each bundle into a zip archive
+  archive: format=zip path={{ item.path }}/* dest={{ item.path }}.zip
+  when: item.path is defined
+  with_items: "{{ list_of_openigc_bundles.files }}"
+
+- name: list packaged bundles to be deployed
+  shell: "ls -1 *.zip"
+  args:
+    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
+  register: list_of_openigc_bundles_to_deploy
+
+- name: check for existing OpenIGC bundles that are registered
+  uri:
+    url: "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/"
+    method: GET
+    user: "{{ ibm_infosvr_openigc_admin_user }}"
+    password: "{{ ibm_infosvr_openigc_admin_user_pwd }}"
+    validate_certs: no
+    status_code: 200
+  register: existing_openigc_bundles
+
+- name: create OpenIGC bundles that are not registered
+  shell: 'curl  -X POST "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/" \
+                -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }} \
+                -k -f \
+                -F file=@{{ item }}'
+  args:
+    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
+  when: not ((item|replace(".zip", "")) in existing_openigc_bundles.json)
+  with_items: "{{ list_of_openigc_bundles_to_deploy.stdout_lines }}"
+
+- name: update OpenIGC bundles that are already registered
+  shell: 'curl  -X PUT "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/" \
+                -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }} \
+                -k -f \
+                -F file=@{{ item }}'
+  args:
+    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
+  when: (item|replace(".zip", "")) in existing_openigc_bundles.json
+  with_items: "{{ list_of_openigc_bundles_to_deploy.stdout_lines }}"

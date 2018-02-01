@@ -1,0 +1,35 @@
+---
+###
+# Copyright 2018 IBM Corp. All Rights Reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+
+- name: transfer asset instances
+  copy: src={{ item }} dest={{ ibm_infosvr_openigc_assets_dir }}/assets/{{ item|basename }} mode=0644
+  with_items: "{{ ibm_infosvr_openigc_asset_instances }}"
+
+- name: list asset instances to be loaded
+  shell: "ls -1"
+  args:
+    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/assets"
+  register: list_of_openigc_assets_to_load
+
+- name: upload any instances of OpenIGC assets
+  shell: 'curl  -X POST "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/assets/" \
+                -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }} \
+                -k -f \
+                -F file=@{{ item }}'
+  args:
+    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/assets"
+  with_items: "{{ list_of_openigc_assets_to_load.stdout_lines }}"

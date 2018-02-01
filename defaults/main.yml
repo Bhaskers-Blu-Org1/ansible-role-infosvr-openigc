@@ -1,0 +1,42 @@
+---
+###
+# Copyright 2018 IBM Corp. All Rights Reserved.
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#      http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+
+# Credentials (override in vault, etc as needed)
+ibm_infosvr_openigc_services_host: is-server.ibm.com
+ibm_infosvr_openigc_services_console_port: 9445
+ibm_infosvr_openigc_admin_user: isadmin
+ibm_infosvr_openigc_admin_user_pwd: isadmin
+
+# These are used to set permissions for directory below
+ibm_infosvr_openigc_dsadm_user: dsadm
+ibm_infosvr_openigc_dsadm_group: dstage
+
+# Directory from which to load the files
+ibm_infosvr_openigc_assets_dir: /data/openigc
+
+# List of directories from which to deploy bundles
+# structure within the directory should be:
+# - asset_type_descriptor.xml
+# - i18n/labels.properties
+# - icons/*-icon.gif
+# - icons/*-bigIcon.gif
+ibm_infosvr_openigc_bundle_directories: []
+
+# List of files that contain asset instances for bundles
+# naming convention of file should follow:
+# - asset_instances-<bundleId>.xml
+ibm_infosvr_openigc_asset_instances: []
