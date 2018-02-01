@@ -27,10 +27,14 @@
   register: list_of_openigc_assets_to_load
 
 - name: upload any instances of OpenIGC assets
-  shell: 'curl  -X POST "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/assets/" \
-                -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }} \
-                -k -f \
-                -F file=@{{ item }}'
-  args:
-    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/assets"
+  uri:
+    url: "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/assets/"
+    method: POST
+    user: "{{ ibm_infosvr_openigc_admin_user }}"
+    password: "{{ ibm_infosvr_openigc_admin_user_pwd }}"
+    body: "{{ lookup('file',item) }}"
+    validate_certs: no
+    status_code: 200
+    headers:
+      Content-Type: "application/xml"
   with_items: "{{ list_of_openigc_assets_to_load.stdout_lines }}"
