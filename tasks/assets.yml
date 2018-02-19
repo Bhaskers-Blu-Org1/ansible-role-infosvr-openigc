@@ -15,26 +15,15 @@
 # limitations under the License.
 ###
 
-- name: transfer asset instances
-  copy: src={{ item }} dest={{ ibm_infosvr_openigc_assets_dir }}/assets/{{ item|basename }} mode=0644
-  with_items: "{{ ibm_infosvr_openigc_asset_instances }}"
-
-- name: list asset instances to be loaded
-  shell: "ls -1"
-  args:
-    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/assets"
-  changed_when: False
-  register: list_of_openigc_assets_to_load
-
 - name: upload any instances of OpenIGC assets
   uri:
     url: "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/assets/"
     method: POST
     user: "{{ ibm_infosvr_openigc_admin_user }}"
     password: "{{ ibm_infosvr_openigc_admin_user_pwd }}"
-    body: "{{ lookup('file',item) }}"
+    body: "{{ lookup('file', item) }}"
     validate_certs: no
     status_code: 200
     headers:
       Content-Type: "application/xml"
-  with_items: "{{ list_of_openigc_assets_to_load.stdout_lines }}"
+  with_items: "{{ ibm_infosvr_openigc_asset_instances }}"
