@@ -34,4 +34,9 @@
   become: yes
 
 - import_tasks: bundles.yml
+  become_user: "{{ ibm_infosvr_openigc_dsadm_user }}"
+  become: yes
+
 - import_tasks: assets.yml
+  become_user: "{{ ibm_infosvr_openigc_dsadm_user }}"
+  become: yes
