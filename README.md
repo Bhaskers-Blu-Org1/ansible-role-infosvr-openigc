@@ -1,4 +1,4 @@
-# ansible-role-ibm-infosvr-openigc
+# ansible-role-infosvr-openigc
 
 Ansible role for automating the deployment of OpenIGC objects for the Information Governance Catalog, within IBM Information Server.
 
