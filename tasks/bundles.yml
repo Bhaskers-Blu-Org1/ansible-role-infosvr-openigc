@@ -16,13 +16,28 @@
 ###
 
 - name: transfer bundles
-  synchronize: src={{ item }} dest={{ ibm_infosvr_openigc_assets_dir }}/bundles mode=push
+  synchronize:
+    src: "{{ item }}"
+    dest: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
+    mode: push
+    owner: no
+    group: no
   with_items: "{{ ibm_infosvr_openigc_bundle_directories }}"
 
 - name: list bundles to be deployed
   find: file_type=directory paths={{ ibm_infosvr_openigc_assets_dir }}/bundles recurse=no
   changed_when: False
   register: list_of_openigc_bundles
+
+- name: ensure bundles are owned by non-root user
+  file:
+    path: "{{ item.path }}"
+    owner: "{{ ibm_infosvr_openigc_dsadm_user }}"
+    group: "{{ ibm_infosvr_openigc_dsadm_group }}"
+    recurse: yes
+  become_user: root
+  become: yes
+  with_items: "{{ list_of_openigc_bundles.files }}"
 
 - name: package each bundle into a zip archive
   archive: format=zip path={{ item.path }}/* dest={{ item.path }}.zip
@@ -54,6 +69,7 @@
                 -F file=@{{ item }}'
   args:
     chdir: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
+    warn: False
   when: not ((item|replace(".zip", "")) in existing_openigc_bundles.json)
   with_items: "{{ list_of_openigc_bundles_to_deploy.stdout_lines }}"
 
@@ -64,5 +80,6 @@
                 -F file=@{{ item }}'
   args:
     chdir: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
+    warn: False
   when: (item|replace(".zip", "")) in existing_openigc_bundles.json
   with_items: "{{ list_of_openigc_bundles_to_deploy.stdout_lines }}"
