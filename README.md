@@ -20,12 +20,6 @@ The role is primarily inteded to be imported into other playbooks as-needed for 
 ```
 - import_role: name=IBM.infosvr-openigc
   vars:
-    ibm_infosvr_openigc_services_host: myhost.domain.com
-    ibm_infosvr_openigc_services_console_port: 9445
-    ibm_infosvr_openigc_admin_user: isadmin
-    ibm_infosvr_openigc_admin_user_pwd: "{{ some_pwd_from_vault }}"
-    ibm_infosvr_openigc_dsadm_user: dsadm
-    ibm_infosvr_openigc_dsadm_group: dstage
     ibm_infosvr_openigc_bundle_directories:
       - "/some/directory/<BundleId>"
     ibm_infosvr_openigc_asset_instances:
