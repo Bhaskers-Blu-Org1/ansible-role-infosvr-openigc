@@ -16,12 +16,9 @@
 ###
 
 - name: transfer bundles
-  synchronize:
+  copy:
     src: "{{ item }}"
     dest: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
-    mode: push
-    owner: no
-    group: no
   with_items: "{{ ibm_infosvr_openigc_bundle_directories }}"
 
 - name: list bundles to be deployed
@@ -38,11 +35,15 @@
   become_user: root
   become: yes
   with_items: "{{ list_of_openigc_bundles.files }}"
+  loop_control:
+    label: "{{ item.path }}"
 
 - name: package each bundle into a zip archive
   archive: format=zip path={{ item.path }}/* dest={{ item.path }}.zip
   when: item.path is defined
   with_items: "{{ list_of_openigc_bundles.files }}"
+  loop_control:
+    label: "{{ item.path }}.zip"
 
 - name: list packaged bundles to be deployed
   shell: "ls -1 *.zip"
