@@ -25,7 +25,12 @@
   become: yes
 
 - name: ensure required directories exist
-  file: state=directory path={{ item }} owner={{ ibm_infosvr_openigc_dsadm_user }} group={{ ibm_infosvr_openigc_dsadm_group }} mode=0755
+  file:
+    state: directory
+    path: "{{ item }}"
+    owner: "{{ ibm_infosvr_openigc_dsadm_user }}"
+    group: "{{ ibm_infosvr_openigc_dsadm_group }}"
+    mode: 0755
   with_items:
     - "{{ ibm_infosvr_openigc_assets_dir }}"
     - "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
@@ -39,4 +44,12 @@
 
 - import_tasks: assets.yml
   become_user: "{{ ibm_infosvr_openigc_dsadm_user }}"
+  become: yes
+
+- name: cleanup directories
+  file: state=absent path={{ item }}
+  with_items:
+    - "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
+    - "{{ ibm_infosvr_openigc_assets_dir }}/assets"
+  become_user: root
   become: yes
