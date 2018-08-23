@@ -17,7 +17,7 @@ See `defaults/main.yml` for inline documentation, and the example below for the 
 
 The role is primarily inteded to be imported into other playbooks as-needed for the deployment of OpenIGC objects -- both bundles and asset instances. (Thus the need for Ansible v2.4.x and the `import_role` module.)
 
-```
+```yml
 - import_role: name=IBM.infosvr-openigc
   vars:
     ibm_infosvr_openigc_bundle_directories:
