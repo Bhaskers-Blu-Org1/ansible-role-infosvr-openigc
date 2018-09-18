@@ -20,7 +20,7 @@
 {% endif %}
 {% endif %}{% endfor %}
 {% if (ns.parent_id|length) > 0 %}
-      <reference name="${{ ns.parent_type[-1] }}" value="{{ ns.parent_id[-1] }}"/>
+      <reference name="${{ ns.parent_type[-1] }}" assetIDs="{{ ns.parent_id[-1] }}"/>
 {% else %}{% set ns.completeIDs = ns.completeIDs + [asset_id] %}{% endif %}
     </asset>
 {% elif 'names' in asset %}
@@ -28,7 +28,7 @@
     <asset class="{{ qualifier }}-{{ asset['class'] }}" repr="{{ asset_name }}" ID="{{ asset_id }}">
       <attribute name="name" value="{{ asset_name }}"/>
 {% if (ns.parent_id|length) > 0 %}
-      <reference name="${{ ns.parent_type[-1] }}" value="{{ ns.parent_id[-1] }}"/>
+      <reference name="${{ ns.parent_type[-1] }}" assetIDs="{{ ns.parent_id[-1] }}"/>
     </asset>
 {% endif %}
 {% endfor %}
