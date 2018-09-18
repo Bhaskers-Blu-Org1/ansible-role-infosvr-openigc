@@ -16,7 +16,8 @@
 ###
 
 - name: upload any instances of OpenIGC assets
-  uri:
+  local_action:
+    module: uri
     url: "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/assets/"
     method: POST
     user: "{{ ibm_infosvr_openigc_admin_user }}"

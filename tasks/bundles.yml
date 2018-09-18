@@ -15,45 +15,23 @@
 # limitations under the License.
 ###
 
-- name: transfer bundles
-  copy:
-    src: "{{ item }}"
-    dest: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
-  with_items: "{{ ibm_infosvr_openigc_bundle_directories }}"
-
-- name: list bundles to be deployed
-  find: file_type=directory paths={{ ibm_infosvr_openigc_assets_dir }}/bundles recurse=no
-  changed_when: False
-  register: list_of_openigc_bundles
-
-- name: ensure bundles are owned by non-root user
-  file:
-    path: "{{ item.path }}"
-    owner: "{{ ibm_infosvr_openigc_dsadm_user }}"
-    group: "{{ ibm_infosvr_openigc_dsadm_group }}"
-    recurse: yes
-  become_user: root
-  become: yes
-  with_items: "{{ list_of_openigc_bundles.files }}"
-  loop_control:
-    label: "{{ item.path }}"
+- name: ensure generated directory exists
+  local_action:
+    module: file
+    path: generated/
+    state: directory
 
 - name: package each bundle into a zip archive
-  archive: format=zip path={{ item.path }}/* dest={{ item.path }}.zip
-  when: item.path is defined
-  with_items: "{{ list_of_openigc_bundles.files }}"
-  loop_control:
-    label: "{{ item.path }}.zip"
-
-- name: list packaged bundles to be deployed
-  shell: "ls -1 *.zip"
-  args:
-    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
-  changed_when: False
-  register: list_of_openigc_bundles_to_deploy
+  local_action:
+    module: archive
+    format: zip
+    path: "{{ outer_item }}/*"
+    dest: "generated/{{ outer_item | basename }}.zip"
+    remove: no
 
 - name: check for existing OpenIGC bundles that are registered
-  uri:
+  local_action:
+    module: uri
     url: "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/"
     method: GET
     user: "{{ ibm_infosvr_openigc_admin_user }}"
@@ -64,23 +42,23 @@
   register: existing_openigc_bundles
 
 - name: create OpenIGC bundles that are not registered
-  shell: 'curl  -X POST "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/" \
-                -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }} \
-                -k -f \
-                -F file=@{{ item }}'
+  shell: >
+          curl
+          -X POST "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/"
+          -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }}
+          -k -f -F file=@generated/{{ outer_item | basename }}.zip
   args:
-    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
     warn: False
-  when: not ((item|replace(".zip", "")) in existing_openigc_bundles.json)
-  with_items: "{{ list_of_openigc_bundles_to_deploy.stdout_lines }}"
+  delegate_to: localhost
+  when: not ((outer_item | basename) in existing_openigc_bundles.json)
 
 - name: update OpenIGC bundles that are already registered
-  shell: 'curl  -X PUT "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/" \
-                -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }} \
-                -k -f \
-                -F file=@{{ item }}'
+  shell: >
+          curl
+          -X PUT "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/"
+          -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }}
+          -k -f -F file=@generated/{{ outer_item | basename }}.zip
   args:
-    chdir: "{{ ibm_infosvr_openigc_assets_dir }}/bundles"
     warn: False
-  when: (item|replace(".zip", "")) in existing_openigc_bundles.json
-  with_items: "{{ list_of_openigc_bundles_to_deploy.stdout_lines }}"
+  delegate_to: localhost
+  when: (outer_item | basename) in existing_openigc_bundles.json

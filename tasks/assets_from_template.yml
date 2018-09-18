@@ -15,8 +15,25 @@
 # limitations under the License.
 ###
 
-# Credentials (override in vault, etc as needed)
-ibm_infosvr_openigc_services_host: "{% if ibm_infosvr_hosts is defined %}{{ ibm_infosvr_hosts.domain }}{% else %}is-server.ibm.com{% endif %}"
-ibm_infosvr_openigc_services_console_port: "{% if ibm_infosvr_ports_ext is defined %}{{ ibm_infosvr_ports_ext.console }}{% else %}9445{% endif %}"
-ibm_infosvr_openigc_admin_user: "{% if ibm_infosvr_users is defined %}{{ ibm_infosvr_users.isadmin }}{% else %}isadmin{% endif %}"
-ibm_infosvr_openigc_admin_user_pwd: "{% if ibm_infosvr_upwds is defined %}{{ ibm_infosvr_upwds.isadmin }}{% else %}isadmin{% endif %}"
+- name: ensure generated directory exists
+  local_action:
+    module: file
+    path: generated/
+    state: directory
+
+- name: load variables
+  include_vars:
+    file: "{{ outer_item }}"
+    name: __ibm_infosvr_openigc_assets
+
+- name: generate asset XML from variables
+  local_action:
+    module: template
+    src: assets.xml.j2
+    dest: generated/{{ outer_item | basename }}.xml
+
+- name: load asset instances
+  include_tasks: assets.yml
+  vars:
+    ibm_infosvr_openigc_asset_instances:
+      - generated/{{ outer_item | basename }}.xml
