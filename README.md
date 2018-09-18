@@ -4,12 +4,14 @@ Ansible role for automating the deployment of OpenIGC objects for the Informatio
 
 ## Requirements
 
-- Ansible v2.4.x
+- Ansible v2.6.x
 - The following utilities pre-installed on your control machine:
   - zip
   - curl (until Ansible v2.7+ where uri natively supports binary file uploads)
 
 The role does not use any privilege escalation, and executes primarily on the control machine itself (only pushing generate files directly against the relevant APIs in the environment).
+
+Because of the role's use of advanced Jinja templating for the YAML-based inputs, a version of Ansible with a recent Jinja distribution is required (v2.4 is not adequate, hence bump to requiring v2.6+). If you do not need to use the YAML-based transformations described below, however, you may be fine using v2.4.x.
 
 ## Role Variables
 
