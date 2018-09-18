@@ -38,7 +38,11 @@ The role is primarily inteded to be imported into other playbooks as-needed for 
     ibm_infosvr_openigc_asset_instances:
       - /some/directory/asset_instances-<BundleId>.xml
     ibm_infosvr_openigc_assets_as_yaml:
-      - /some/directory/<BundleId>.yml
+      - /some/directory/assets.yml
+    ibm_infosvr_openigc_lineage_flows:
+      - /some/directory/lineage_flows-<BundleId>.xml
+    ibm_infosvr_openigc_flows_as_yaml:
+      - /some/directory/lineage.yml
 ```
 
 ### `ibm_infosvr_openigc_bundle_directories`
@@ -59,9 +63,9 @@ The list of XML files provided through this variable should be fully-working ass
 
 ### `ibm_infosvr_openigc_assets_as_yaml`
 
-The list of YAML files provided through this variable are used to generate valid asset instance XMLs that are then loaded automatically. The structure of each YAML file should be as follows:
-
 This variable is provided as a more convenient / readable way to specify asset instances than learning the XML format required by `ibm_infosvr_openigc_asset_instances` above.
+
+The list of YAML files provided through this variable are used to generate valid asset instance XMLs that are then loaded automatically. The structure of each YAML file should be as follows:
 
 ```yml
 ---
@@ -134,6 +138,87 @@ contains:
           - YourFile.txt
           - OtherFile.txt
 ```
+
+### `ibm_infosvr_openigc_lineage_flows`
+
+The list of XML files provided through this variable should be fully-working lineage flow XML files, either already generated (eg. by variable below) or manually created.
+
+### `ibm_infosvr_openigc_flows_as_yaml`
+
+This variable is provided as a more convenient / readable way to specify asset instances than learning the XML format required by `ibm_infosvr_openigc_lineage_flows` above.
+
+The list of YAML files provided through this variable are used to generate valid lineage flow XMLs that are then loaded automatically. The structure of each YAML file should be as follows:
+
+```yml
+---
+
+assets:
+  - class: <FullClassName>
+    name: <name>
+    contains:
+      - class: <NestedFullClassName>
+        name: <name>
+        id: <unique identifier>
+        contains:
+          ...
+
+flows:
+  - name: <meaningful comment>
+    within: <id>
+    contains:
+      - name: <meaningful comment>
+        from:
+          - <id>
+          - ...
+        to:
+          - <id>
+          - ...
+      - ...
+```
+
+The `contains` substructure for `assets` can be nested as many times as necessary to create the containment hierarhcy you require for your asset(s). Each sub-structure must have at a minimum the `class` and `name` defined (in fact, any other attributes are simply ignored as they are unused by the lineage flow XML). Note that in this case you should specify fully-qualified class names, including the bundleId, eg. `$BundleId-ClassName`. This is to ensure you can combine both OpenIGC and native assets in a lineage flow (and create lineage flows spanning multiple OpenIGC bundles).
+
+For any assets you plan to use as part of a flow, also include an explicit `id` attribute to specify how you will refer to them within the `flows` variable. This identifier should be unique within the YAML file, and should not contain any spaces or other special characters (other than `.` and `_`).
+
+Each `name` in the `flows` variable is used as a comment in the generated XML, but does not actually appear in IGC itself.
+
+Consider the following example:
+
+```yml
+---
+
+assets:
+  - class: $TestBundle-Folder
+    name: root
+    contains:
+      - class: $TestBundle-File
+        name: MyFile.txt
+        id: MyFile.txt
+      - class: $TestBundle-File
+        name: YourFile.txt
+        id: YourFile.txt
+      - class: $TestBundle-File
+        name: OtherFile.txt
+        id: OtherFile.txt
+  - class: $TestBundle-Command
+    name: copy
+    id: copy
+
+flows:
+  - name: Copy command to duplicate a file
+    within: copy
+    contains:
+      - name: Copy from My to Your and Other
+        from:
+          - MyFile.txt
+        to:
+          - YourFile.txt
+          - OtherFile.txt
+```
+
+In the example, we have a `TestBundle` that defines new objects representing `Folder`s, `File`s and `Command`s. The `assets` section defines only the objects we want to describe in lineage, including their containment hierarchy. For each asset we will use in lineage we have defined a unique `id` attribute.
+
+In the `flows` section we then create the lineage: the outer `within` defines the process responsible for whatever action is being depicted in lineage, and the `contains` within that specifies the specific inputs and outputs of the action.
 
 ## License
 

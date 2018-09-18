@@ -29,3 +29,12 @@
   loop_control:
     loop_var: outer_item
   when: ibm_infosvr_openigc_assets_as_yaml is defined
+
+- include_tasks: flows.yml
+  when: ibm_infosvr_openigc_lineage_flows is defined
+
+- include_tasks: flows_from_template.yml
+  with_items: "{{ ibm_infosvr_openigc_flows_as_yaml }}"
+  loop_control:
+    loop_var: outer_item
+  when: ibm_infosvr_openigc_flows_as_yaml is defined
