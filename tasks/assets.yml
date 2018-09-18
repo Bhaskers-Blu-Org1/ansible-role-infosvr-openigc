@@ -16,15 +16,14 @@
 ###
 
 - name: upload any instances of OpenIGC assets
-  local_action:
-    module: uri
-    url: "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/assets/"
-    method: POST
-    user: "{{ ibm_infosvr_openigc_admin_user }}"
-    password: "{{ ibm_infosvr_openigc_admin_user_pwd }}"
-    body: "{{ lookup('file', item) }}"
-    validate_certs: no
-    status_code: 200
-    headers:
-      Content-Type: "application/xml"
+  shell: >
+          curl
+          -X POST "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/assets/"
+          -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }}
+          {% if ibm_infosvr_openigc_verify_selfsigned_ssl is defined and ibm_infosvr_openigc_verify_selfsigned_ssl %}--cacert cache/__ibm_infosvr_cert_root.crt{% endif %}
+          --header "Content-Type:application/xml"
+          -f -d @{{ item }}
+  args:
+    warn: False
   with_items: "{{ ibm_infosvr_openigc_asset_instances }}"
+  delegate_to: localhost

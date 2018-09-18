@@ -20,3 +20,7 @@ ibm_infosvr_openigc_services_host: "{% if ibm_infosvr_hosts is defined %}{{ ibm_
 ibm_infosvr_openigc_services_console_port: "{% if ibm_infosvr_ports_ext is defined %}{{ ibm_infosvr_ports_ext.console }}{% else %}9445{% endif %}"
 ibm_infosvr_openigc_admin_user: "{% if ibm_infosvr_users is defined %}{{ ibm_infosvr_users.isadmin }}{% else %}isadmin{% endif %}"
 ibm_infosvr_openigc_admin_user_pwd: "{% if ibm_infosvr_upwds is defined %}{{ ibm_infosvr_upwds.isadmin }}{% else %}isadmin{% endif %}"
+
+# Download certificate from domain tier for verification?
+# (Note: if this is false, SSL verification will still be done -- will fail for self-signed SSL certificates)
+ibm_infosvr_openigc_verify_selfsigned_ssl: True

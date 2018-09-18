@@ -19,6 +19,8 @@ See `defaults/main.yml` for inline documentation, and the example below for the 
 
 This role will attempt to automatically re-use variables from the [IBM.infosvr](https://galaxy.ansible.com/IBM/infosvr) role, for instance by using a playbook that first imports `IBM.infosvr` using `tasks_from=setup_vars.yml`.
 
+By default, the role will do SSL verification of self-signed certificates if you have retrieved them using `IBM.infosvr`'s `get_certificate.yml` task (see example playbook below). This is controlled by the `ibm_infosvr_openigc_verify_selfsigned_ssl` variable of the role: if you want to only verify against properly signed and trusted SSL certificates, you can set this variable to `False` and any self-signed domain tier certificate will no longer be trusted.
+
 ## Example Playbook
 
 The role is primarily inteded to be imported into other playbooks as-needed for the deployment of OpenIGC objects -- both bundles and asset instances. (Thus the need for Ansible v2.4.x and the `import_role` module.)
@@ -29,6 +31,7 @@ The role is primarily inteded to be imported into other playbooks as-needed for 
   hosts: all
   tasks:
     - import_role: name=IBM.infosvr tasks_from=setup_vars.yml
+    - import_role: name=IBM.infosvr tasks_from=get_certificate.yml
 
 - name: load OpenIGC bundles and assets
   hosts: ibm-information-server-engine

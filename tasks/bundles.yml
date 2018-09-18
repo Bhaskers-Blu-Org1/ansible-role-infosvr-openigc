@@ -30,35 +30,37 @@
     remove: no
 
 - name: check for existing OpenIGC bundles that are registered
-  local_action:
-    module: uri
-    url: "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/"
-    method: GET
-    user: "{{ ibm_infosvr_openigc_admin_user }}"
-    password: "{{ ibm_infosvr_openigc_admin_user_pwd }}"
-    validate_certs: no
-    status_code: 200
-  changed_when: False
-  register: existing_openigc_bundles
+  shell: >
+          curl
+          -X GET "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/"
+          -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }}
+          {% if ibm_infosvr_openigc_verify_selfsigned_ssl is defined and ibm_infosvr_openigc_verify_selfsigned_ssl %}--cacert cache/__ibm_infosvr_cert_root.crt{% endif %}
+          -f
+  args:
+    warn: False
+  delegate_to: localhost
+  register: ibm_infosvr_openigc_existing_bundles
 
 - name: create OpenIGC bundles that are not registered
   shell: >
           curl
           -X POST "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/"
           -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }}
-          -k -f -F file=@generated/{{ outer_item | basename }}.zip
+          {% if ibm_infosvr_openigc_verify_selfsigned_ssl is defined and ibm_infosvr_openigc_verify_selfsigned_ssl %}--cacert cache/__ibm_infosvr_cert_root.crt{% endif %}
+          -f -F file=@generated/{{ outer_item | basename }}.zip
   args:
     warn: False
   delegate_to: localhost
-  when: not ((outer_item | basename) in existing_openigc_bundles.json)
+  when: not ((outer_item | basename) in (ibm_infosvr_openigc_existing_bundles.stdout | to_json))
 
 - name: update OpenIGC bundles that are already registered
   shell: >
           curl
           -X PUT "https://{{ ibm_infosvr_openigc_services_host }}:{{ ibm_infosvr_openigc_services_console_port }}/ibm/iis/igc-rest/v1/bundles/"
           -u {{ ibm_infosvr_openigc_admin_user }}:{{ ibm_infosvr_openigc_admin_user_pwd }}
-          -k -f -F file=@generated/{{ outer_item | basename }}.zip
+          {% if ibm_infosvr_openigc_verify_selfsigned_ssl is defined and ibm_infosvr_openigc_verify_selfsigned_ssl %}--cacert cache/__ibm_infosvr_cert_root.crt{% endif %}
+          -f -F file=@generated/{{ outer_item | basename }}.zip
   args:
     warn: False
   delegate_to: localhost
-  when: (outer_item | basename) in existing_openigc_bundles.json
+  when: (outer_item | basename) in (ibm_infosvr_openigc_existing_bundles.stdout | to_json)
