@@ -25,5 +25,5 @@
           -f -d @{{ item }}
   args:
     warn: False
-  with_items: "{{ ibm_infosvr_openigc_asset_instances }}"
+  with_items: "{{ assets_as_xml }}"
   delegate_to: localhost

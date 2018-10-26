@@ -35,5 +35,5 @@
 - name: load asset instances
   include_tasks: assets.yml
   vars:
-    ibm_infosvr_openigc_asset_instances:
+    assets_as_xml:
       - generated/{{ outer_item | basename }}.xml

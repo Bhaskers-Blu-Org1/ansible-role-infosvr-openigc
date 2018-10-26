@@ -35,5 +35,5 @@
 - name: load lineage flow
   include_tasks: flows.yml
   vars:
-    ibm_infosvr_openigc_lineage_flows:
+    flows_as_xml:
       - generated/{{ outer_item | basename }}.xml

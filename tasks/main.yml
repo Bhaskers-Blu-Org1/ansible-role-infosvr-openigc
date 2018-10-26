@@ -16,25 +16,25 @@
 ###
 
 - include_tasks: bundles.yml
-  with_items: "{{ ibm_infosvr_openigc_bundle_directories }}"
+  with_items: "{{ bundles }}"
   loop_control:
     loop_var: outer_item
-  when: ibm_infosvr_openigc_bundle_directories is defined
+  when: bundles is defined
 
 - include_tasks: assets.yml
-  when: ibm_infosvr_openigc_asset_instances is defined
+  when: assets_as_xml is defined
 
 - include_tasks: assets_from_template.yml
-  with_items: "{{ ibm_infosvr_openigc_assets_as_yaml }}"
+  with_items: "{{ assets_as_yaml }}"
   loop_control:
     loop_var: outer_item
-  when: ibm_infosvr_openigc_assets_as_yaml is defined
+  when: assets_as_yaml is defined
 
 - include_tasks: flows.yml
-  when: ibm_infosvr_openigc_lineage_flows is defined
+  when: flows_as_xml is defined
 
 - include_tasks: flows_from_template.yml
-  with_items: "{{ ibm_infosvr_openigc_flows_as_yaml }}"
+  with_items: "{{ flows_as_yaml }}"
   loop_control:
     loop_var: outer_item
-  when: ibm_infosvr_openigc_flows_as_yaml is defined
+  when: flows_as_yaml is defined

@@ -25,5 +25,5 @@
           -f -d @{{ item }}
   args:
     warn: False
-  with_items: "{{ ibm_infosvr_openigc_lineage_flows }}"
+  with_items: "{{ flows_as_xml }}"
   delegate_to: localhost

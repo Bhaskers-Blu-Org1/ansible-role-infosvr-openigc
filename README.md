@@ -7,11 +7,11 @@ Ansible role for automating the deployment of OpenIGC objects for the Informatio
 - Ansible v2.6.x
 - The following utilities pre-installed on your control machine:
   - zip
-  - curl (until Ansible v2.7+ where uri natively supports binary file uploads)
+  - curl
 
 The role does not use any privilege escalation, and executes primarily on the control machine itself (only pushing generate files directly against the relevant APIs in the environment).
 
-Because of the role's use of advanced Jinja templating for the YAML-based inputs, a version of Ansible with a recent Jinja distribution is required (v2.4 is not adequate, hence bump to requiring v2.6+). If you do not need to use the YAML-based transformations described below, however, you may be fine using v2.4.x.
+Because of the role's use of advanced Jinja templating for the YAML-based inputs, a version of Ansible with a recent Jinja distribution is required (v2.4 is not adequate, hence bump to requiring v2.6.x). While v2.7 now includes the ability for the `uri` module to submit files, it does not provide any capability to override the certificate authority -- so to allow validation of self-signed certificates, without needing to modify the CA of the control machine itself, we still rely on `curl` for the time being.
 
 ## Role Variables
 
@@ -38,19 +38,23 @@ The role is primarily inteded to be imported into other playbooks as-needed for 
   roles:
     - IBM.infosvr-openigc
   vars:
-    ibm_infosvr_openigc_bundle_directories:
+    bundles:
       - /some/directory/<BundleId>
-    ibm_infosvr_openigc_asset_instances:
+    assets_as_xml:
       - /some/directory/asset_instances-<BundleId>.xml
-    ibm_infosvr_openigc_assets_as_yaml:
+    assets_as_yaml:
       - /some/directory/assets.yml
-    ibm_infosvr_openigc_lineage_flows:
+    flows_as_xml:
       - /some/directory/lineage_flows-<BundleId>.xml
-    ibm_infosvr_openigc_flows_as_yaml:
+    flows_as_yaml:
       - /some/directory/lineage.yml
 ```
 
-### `ibm_infosvr_openigc_bundle_directories`
+## Action (and object) structures
+
+The following describes all of the actions and object types currently covered by this role, and their expected structures. Regardless of the order in which the variables are listed in the playbook, they will be loaded in the order they are listed below.
+
+### `bundles`
 
 The list of directories provided through this variable should be in bundle form, specifically containing the following structure:
 
@@ -62,13 +66,13 @@ The list of directories provided through this variable should be in bundle form,
     - `<ClassId>-icon.gif`: should be a 16x16 pixel representation of the class, and could also be a `.png` file, but should be named `.gif` regardless
     - `<ClassId>-bigIcon.gif`: should be a 32x32 pixel representation of the class, and could also be a `.png` file, but should be named `.gif` regardless
 
-### `ibm_infosvr_openigc_asset_instances`
+### `assets_as_xml`
 
 The list of XML files provided through this variable should be fully-working asset instance XML files, either already generated (eg. by variable below) or manually created.
 
-### `ibm_infosvr_openigc_assets_as_yaml`
+### `assets_as_yaml`
 
-This variable is provided as a more convenient / readable way to specify asset instances than learning the XML format required by `ibm_infosvr_openigc_asset_instances` above.
+This variable is provided as a more convenient / readable way to specify asset instances than learning the XML format required by `assets_as_xml` above.
 
 The list of YAML files provided through this variable are used to generate valid asset instance XMLs that are then loaded automatically. The structure of each YAML file should be as follows:
 
@@ -144,13 +148,13 @@ contains:
           - OtherFile.txt
 ```
 
-### `ibm_infosvr_openigc_lineage_flows`
+### `flows_as_xml`
 
 The list of XML files provided through this variable should be fully-working lineage flow XML files, either already generated (eg. by variable below) or manually created.
 
-### `ibm_infosvr_openigc_flows_as_yaml`
+### `flows_as_yaml`
 
-This variable is provided as a more convenient / readable way to specify asset instances than learning the XML format required by `ibm_infosvr_openigc_lineage_flows` above.
+This variable is provided as a more convenient / readable way to specify asset instances than learning the XML format required by `flows_as_xml` above.
 
 The list of YAML files provided through this variable are used to generate valid lineage flow XMLs that are then loaded automatically. The structure of each YAML file should be as follows:
 
