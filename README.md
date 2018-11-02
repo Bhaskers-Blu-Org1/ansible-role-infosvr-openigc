@@ -2,6 +2,8 @@
 
 Ansible role for automating the deployment of OpenIGC objects for the Information Governance Catalog, within IBM Information Server.
 
+New to Ansible? This [simple introduction](https://cmgrote.github.io/ansible-tutorial/) might help.
+
 ## Requirements
 
 - Ansible v2.6.x
