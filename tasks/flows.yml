@@ -28,4 +28,5 @@
   args:
     warn: False
   with_items: "{{ flows_as_xml }}"
+  when: flows_as_xml is defined
   delegate_to: localhost

@@ -41,6 +41,7 @@
   args:
     warn: False
   delegate_to: localhost
+  changed_when: False
   register: ibm_infosvr_openigc_existing_bundles
 
 - name: create OpenIGC bundles that are not registered
