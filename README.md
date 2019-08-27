@@ -36,7 +36,7 @@ The role is primarily inteded to be imported into other playbooks as-needed for 
     - import_role: name=IBM.infosvr tasks_from=get_certificate.yml
 
 - name: load OpenIGC bundles and assets
-  hosts: ibm-information-server-engine
+  hosts: ibm_information_server_engine
   roles:
     - IBM.infosvr-openigc
   vars:
