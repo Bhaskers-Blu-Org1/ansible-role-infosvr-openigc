@@ -81,7 +81,7 @@ The list of YAML files provided through this variable are used to generate valid
 ```yml
 ---
 
-bundleId: <BundleId>
+bundleId: $<BundleId>
 contains:
   - class: <ClassName>
     name: <name>
@@ -99,7 +99,7 @@ In addition, any number of additional attributes can also be specified as permit
 ```yml
 ---
 
-bundleId: TestBundle
+bundleId: $TestBundle
 contains:
   - class: Folder
     name: level1
@@ -123,7 +123,7 @@ For attributes that allow multiple values, simply specify define the value for t
 ```yml
 ---
 
-bundleId: TestBundle
+bundleId: $TestBundle
 contains:
   - class: Folder
     name: root
@@ -138,7 +138,7 @@ Finally, the `names` shortcut exists for leaf-nodes of a containment hierarchy w
 ```yml
 ---
 
-bundleId: TestBundle
+bundleId: $TestBundle
 contains:
   - class: Folder
     name: root
@@ -189,7 +189,7 @@ flows:
 
 The `contains` substructure for `assets` can be nested as many times as necessary to create the containment hierarhcy you require for your asset(s). Each sub-structure must have at a minimum the `class` and `name` defined (in fact, any other attributes are simply ignored as they are unused by the lineage flow XML). Note that in this case you should specify fully-qualified class names, including the bundleId, eg. `$BundleId-ClassName`. This is to ensure you can combine both OpenIGC and native assets in a lineage flow (and create lineage flows spanning multiple OpenIGC bundles).
 
-For any assets you plan to use as part of a flow, also include an explicit `id` attribute to specify how you will refer to them within the `flows` variable. This identifier should be unique within the YAML file, and should not contain any spaces or other special characters (other than `.` and `_`).
+For any assets you plan to use as part of a flow, also include an explicit `id` attribute to specify how you will refer to them within the `flows` variable. This identifier should be unique within the YAML file, and should not contain any spaces or other special characters (other than `.` and `_`). This is necessary in addition to the `name` because the `id` provides a flat, unique reference within the file; the `name` is in reality a nested identifier that will depend on the containment structure in which it appears, and is therefore not unique on its own (only when taking into consideration its entire containment structure).
 
 Each `name` in the `flows` variable is used as a comment in the generated XML, but does not actually appear in IGC itself.
 
